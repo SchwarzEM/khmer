@@ -713,7 +713,6 @@ typedef struct {
 } khmer_KHashbitsObject;
 
 static void khmer_subset_dealloc(PyObject *);
-static PyObject * khmer_subset_getattr(PyObject * obj, char * name);
 
 static PyTypeObject khmer_KSubsetPartitionType = {
     PyVarObject_HEAD_INIT(NULL, 0)
@@ -721,7 +720,7 @@ static PyTypeObject khmer_KSubsetPartitionType = {
     0,
     khmer_subset_dealloc,   /*tp_dealloc*/
     0,              /*tp_print*/
-    khmer_subset_getattr,   /*tp_getattr*/
+    0,              /*tp_getattr*/
     0,              /*tp_setattr*/
     0,              /*tp_compare*/
     0,              /*tp_repr*/
@@ -1610,12 +1609,6 @@ static PyMethodDef khmer_counting_methods[] = {
     {NULL, NULL, 0, NULL}           /* sentinel */
 };
 
-static PyObject *
-khmer_counting_getattr(PyObject * obj, char * name)
-{
-    return Py_FindMethod(khmer_counting_methods, obj, name);
-}
-
 #define is_counting_obj(v)  (Py_TYPE(v) == &khmer_KCountingHashType)
 
 static PyTypeObject khmer_KCountingHashType
@@ -1626,7 +1619,7 @@ CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF("khmer_KCountingHashObject")
     0,
     khmer_counting_dealloc, /*tp_dealloc*/
     0,              /*tp_print*/
-    khmer_counting_getattr, /*tp_getattr*/
+    0,              /*tp_getattr*/
     0,              /*tp_setattr*/
     0,              /*tp_compare*/
     0,              /*tp_repr*/
@@ -1641,6 +1634,13 @@ CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF("khmer_KCountingHashObject")
     0,              /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT,     /*tp_flags*/
     "counting hash object",           /* tp_doc */
+    0,                       /* tp_traverse */
+    0,                       /* tp_clear */
+    0,                       /* tp_richcompare */
+    0,                       /* tp_weaklistoffset */
+    0,                       /* tp_iter */
+    0,                       /* tp_iternext */
+    khmer_counting_methods,  /* tp_methods */
 };
 
 //
@@ -1731,7 +1731,6 @@ static PyObject* khmer_hashbits_new(PyTypeObject * type, PyObject * args,
                                     PyObject * kwds);
 static int khmer_hashbits_init(khmer_KHashbitsObject * self, PyObject * args,
                                PyObject * kwds);
-static PyObject * khmer_hashbits_getattr(PyObject * obj, char * name);
 
 static PyTypeObject khmer_KHashbitsType
 CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF("khmer_KHashbitsObject")
@@ -1741,7 +1740,7 @@ CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF("khmer_KHashbitsObject")
     0,
     (destructor)khmer_hashbits_dealloc, /*tp_dealloc*/
     0,              /*tp_print*/
-    khmer_hashbits_getattr, /*tp_getattr*/
+    0,              /*tp_getattr*/
     0,              /*tp_setattr*/
     0,              /*tp_compare*/
     0,              /*tp_repr*/
@@ -3430,12 +3429,6 @@ static PyMethodDef khmer_hashbits_methods[] = {
     {NULL, NULL, 0, NULL}           /* sentinel */
 };
 
-static PyObject *
-khmer_hashbits_getattr(PyObject * obj, char * name)
-{
-    return Py_FindMethod(khmer_hashbits_methods, obj, name);
-}
-
 // __new__ for hashbits; necessary for proper subclassing
 // This will essentially do what the old factory function did. Unlike many __new__
 // methods, we take our arguments here, because there's no "uninitialized" hashbits
@@ -3677,12 +3670,6 @@ static PyMethodDef khmer_subset_methods[] = {
     { "partition_average_coverages", subset_partition_average_coverages, METH_VARARGS, "" },
     {NULL, NULL, 0, NULL}           /* sentinel */
 };
-
-static PyObject *
-khmer_subset_getattr(PyObject * obj, char * name)
-{
-    return Py_FindMethod(khmer_subset_methods, obj, name);
-}
 
 /////////////////
 // LabelHash
@@ -4199,7 +4186,7 @@ static PyTypeObject khmer_ReadAlignerType = {
     0,					    /*tp_itemsize*/
     (destructor)khmer_readaligner_dealloc,  /*tp_dealloc*/
     0,                          /*tp_print*/
-    0,			        /*tp_getattr*/
+    0,                          /*tp_getattr*/
     0,                          /*tp_setattr*/
     0,                          /*tp_compare*/
     0,                          /*tp_repr*/
@@ -4214,21 +4201,21 @@ static PyTypeObject khmer_ReadAlignerType = {
     0,                          /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT,         /*tp_flags*/
     "ReadAligner object",           /* tp_doc */
-    0,		               /* tp_traverse */
-    0,		               /* tp_clear */
-    0,		               /* tp_richcompare */
-    0,		               /* tp_weaklistoffset */
-    0,		               /* tp_iter */
-    0,		               /* tp_iternext */
-    khmer_ReadAligner_methods,  /* tp_methods */
-    0,             /* tp_members */
+    0,                         /* tp_traverse */
+    0,                         /* tp_clear */
+    0,                         /* tp_richcompare */
+    0,                         /* tp_weaklistoffset */
+    0,                         /* tp_iter */
+    0,                         /* tp_iternext */
+    khmer_ReadAligner_methods, /* tp_methods */
+    0,                         /* tp_members */
     0,                         /* tp_getset */
     0,                         /* tp_base */
     0,                         /* tp_dict */
     0,                         /* tp_descr_get */
     0,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
-    0,			       /* tp_init */
+    0,			               /* tp_init */
     0,                         /* tp_alloc */
     khmer_ReadAligner_new,     /* tp_new */
 };
@@ -4748,7 +4735,14 @@ init_khmer(void)
 {
     using namespace python;
 
-    khmer_KCountingHashType.ob_type   = &PyType_Type;
+    if (PyType_Ready(&khmer_KCountingHashType) < 0) {
+        return;
+    }
+
+    khmer_KSubsetPartitionType.tp_methods = khmer_subset_methods;
+    if (PyType_Ready(&khmer_KSubsetPartitionType) < 0) {
+        return;
+    }
 
     // implemented __new__ for Hashbits; keeping factory func around as well
     // for backwards compat with old scripts
@@ -4762,6 +4756,10 @@ init_khmer(void)
     khmer_KLabelHashType.tp_base = &khmer_KHashbitsType;
     khmer_KLabelHashType.tp_new = khmer_labelhash_new;
     if (PyType_Ready(&khmer_KLabelHashType) < 0) {
+        return;
+    }
+
+    if (PyType_Ready(&khmer_ReadAlignerType) < 0) {
         return;
     }
 
