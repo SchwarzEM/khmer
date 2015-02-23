@@ -3,6 +3,13 @@
    * setup.py: point to the latest screed release candidate to work around
    versioneer bug.
 
+2015-02-23  Luiz Irber  <irberlui@msu.edu>
+
+   * khmer/_khmermodule.cc: Update extension to use recommended practices,
+   PyLong instead of PyInt, Type initialization, PyBytes instead of PyString.
+   Replace common initialization with explicit type structs, and all types
+   conform to the CPython checklist.
+
 2015-02-23  Tamer A. Mansour  <drtamermansour@gmail.com>
 
    * examples/stamps/do.sh: the argument --savehash was changed to --savetable
