@@ -10,9 +10,9 @@ This is khmer; please see http://khmer.readthedocs.org/.
 
 from khmer._khmer import CountingHash
 from khmer._khmer import set_reporting_callback
-from khmer._khmer import _LabelHash
-from khmer._khmer import _Hashbits
-from khmer._khmer import _HLLCounter
+from khmer._khmer import LabelHash as _LabelHash
+from khmer._khmer import Hashbits as _Hashbits
+from khmer._khmer import HLLCounter as _HLLCounter
 from khmer._khmer import ReadAligner
 
 from khmer._khmer import forward_hash  # figuregen/*.py
