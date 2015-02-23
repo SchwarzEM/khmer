@@ -9,7 +9,6 @@ This is khmer; please see http://khmer.readthedocs.org/.
 """
 
 from khmer._khmer import CountingHash
-from khmer._khmer import _new_hashbits
 from khmer._khmer import set_reporting_callback
 from khmer._khmer import _LabelHash
 from khmer._khmer import _Hashbits
@@ -59,7 +58,7 @@ def new_hashbits(k, starting_size, n_tables=2):
     """
     primes = get_n_primes_above_x(n_tables, starting_size)
 
-    return _new_hashbits(k, primes)
+    return _Hashbits(k, primes)
 
 
 def new_counting_hash(k, starting_size, n_tables=2):
@@ -82,7 +81,7 @@ def load_hashbits(filename):
     Keyword argument:
     filename -- the name of the hashbits file
     """
-    hashtable = _new_hashbits(1, [1])
+    hashtable = _Hashbits(1, [1])
     hashtable.load(filename)
 
     return hashtable
